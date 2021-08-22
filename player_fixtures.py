@@ -9,15 +9,17 @@ SERVER_BIN = "twtask"
 @pytest.fixture
 def player_server():
     sp = subprocess.Popen(['./'+SERVER_BIN], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    pid = sp.pid
-    yield pid
-    subprocess.Popen(['kill', '-9', str(pid)]).communicate()
+    time.sleep(1)
+    yield sp
+    subprocess.Popen(['kill', '-9', str(sp.pid)]).communicate()
+    sp.communicate()
 
 
 @pytest.fixture
-def kill_player_server():
-    def foo(pid):
-        subprocess.Popen(['kill', '-9', str(pid)]).communicate()
+def kill_player_server(player_server):
+    def foo():
+        subprocess.Popen(['kill', '-9', str(player_server.pid)]).communicate()
+        player_server.communicate()
     return foo
 
 
