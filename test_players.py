@@ -7,7 +7,7 @@ import subprocess
 from requests.auth import HTTPDigestAuth
 from player_fixtures import query, result_name_field_verifier, result_syntax_verifier, id_continuation_verifier, \
     unreliable_query, reliable_query, raw_query, player_server, query_func, unique_id_to_player_match_verifier, \
-    post_query, timed_query, TimedThread, verify_server_is_up
+    request_query, timed_query, TimedThread, verify_server_is_up
 
 
 def test_sanity(query, result_syntax_verifier):
@@ -84,8 +84,9 @@ def test_bad_auth(raw_query):
 @pytest.mark.parametrize("page, user, password", [('"1"', 'admin', 'admin'),
                                                   (1.001, 'admin', 'admin)'),
                                                   (-1, 'admin', 'admin')])
+@pytest.mark.bug
 def test_bad_value_for_page(raw_query):
-    assert raw_query.status_code == 418, "unexpected status_code({0})".format(raw_query.status_code)
+    assert raw_query.status_code == 404, "unexpected status_code({0})".format(raw_query.status_code)
 
 
 def test_correct_and_incorrect_auths(query_func):
@@ -141,9 +142,10 @@ def test_performance(query, page):
 
 
 @pytest.mark.bug
-def test_post(post_query):
-    r = post_query(1)
-    assert r.status_code == 405, 'POST is not returning expected status code'
+@pytest.mark.parametrize("req_type", ["post", "put", "delete"])
+def test_post(request_query, req_type):
+    r = request_query(req_type, 1)
+    assert r.status_code == 405, '{} is not returning expected status code'.format(req_type)
 
 
 @pytest.mark.bug
@@ -157,3 +159,16 @@ def test_multiple_clients(timed_query, verify_server_is_up, page1, page2):
     t2.join()
     verify_server_is_up()
 
+
+@pytest.mark.bug
+@pytest.mark.parametrize("page", [0, 18, 28, 5009])
+def test_correct_status_code_for_out_bounds(query_func, page):
+    r = query_func(page)
+    assert r.status_code == 404, "wrong status code({})".format(r.status_code)
+
+
+@pytest.mark.bug
+@pytest.mark.parametrize("url", ['player', 'layer', '123456'])
+def test_correct_status_code_for_bad_api(player_server, url):
+    r = requests.get('http://localhost:8000/{}'.format(url), auth=('admin', 'admin'))
+    assert r.status_code == 404, "wrong status code({})".format(r.status_code)
