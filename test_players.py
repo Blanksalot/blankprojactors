@@ -146,21 +146,13 @@ def test_post(post_query):
 
 
 @pytest.mark.bug
-def test_multiple_clients_same_page(timed_query, verify_server_is_up):
-    t1 = TimedThread(1, 1, 10000, timed_query)
-    t2 = TimedThread(2, 1, 10000, timed_query)
+@pytest.mark.parametrize("page1, page2", [(1, 1), (1, 2)])
+def test_multiple_clients(timed_query, verify_server_is_up, page1, page2):
+    t1 = TimedThread(1, page1, 10000, timed_query)
+    t2 = TimedThread(2, page2, 10000, timed_query)
     t1.start()
     t2.start()
     t1.join()
     t2.join()
     verify_server_is_up()
 
-@pytest.mark.bug
-def test_multiple_clients_different_pages(timed_query, verify_server_is_up):
-    t1 = TimedThread(1, 1, 10000, timed_query)
-    t2 = TimedThread(2, 2, 10000, timed_query)
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    verify_server_is_up()
