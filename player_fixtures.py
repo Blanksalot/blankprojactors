@@ -2,6 +2,7 @@ import pytest
 import subprocess
 import requests
 import time
+import threading
 
 SERVER_BIN = "twtask"
 
@@ -139,3 +140,38 @@ def unique_id_to_player_match_verifier():
             print(list_to_check)
         assert not bad_players, "{}".format(bad_players)
     return foo
+
+@pytest.fixture
+def timed_query(query):
+    def foo(page):
+        st = time.time()
+        r = query(page)
+        run_time = time.time() - st
+        return run_time, r
+    return foo
+
+
+@pytest.fixture
+def verify_server_is_up():
+    def foo():
+        out, err = subprocess.Popen("ps", stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        out = str(out, 'utf-8', 'ignore')
+        assert 'twtask <defunct>' not in out, "twtask crashed"
+        assert 'twtask' in out, "twtask crashed"
+    return foo
+
+
+class TimedThread(threading.Thread):
+    def __init__(self, tid, page, counter, query_function):
+        threading.Thread.__init__(self)
+        self.tid = tid
+        self.page = page
+        self.counter = counter
+        self.qf = query_function
+
+    def run(self):
+        for i in range(self.counter):
+            print(self.tid)
+            run_time, r = self.qf(self.page)
+            print(run_time)
+
