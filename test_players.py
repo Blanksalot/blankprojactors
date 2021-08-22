@@ -139,6 +139,7 @@ def test_performance(query, page):
     print(page, "-", exec_time, "sec")
     assert exec_time < 1, "{0} - {1} sec is too long ".format(page, exec_time)
 
+
 @pytest.mark.bug
 def test_post(post_query):
     r = post_query(1)
