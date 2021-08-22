@@ -85,6 +85,13 @@ def unreliable_query(player_server, query):
     return foo
 
 
+@pytest.fixture()
+def post_query(player_server):
+    def foo(page=1):
+        return requests.post('http://localhost:8000/players?page={}'.format(page), auth=('admin', 'admin'))
+    return foo
+
+
 @pytest.fixture
 def result_syntax_verifier():
     def foo(result):

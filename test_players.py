@@ -4,7 +4,8 @@ import requests
 import random
 from requests.auth import HTTPDigestAuth
 from player_fixtures import query, result_name_field_verifier, result_syntax_verifier, id_continuation_verifier, \
-    unreliable_query, reliable_query, raw_query, player_server, query_func, unique_id_to_player_match_verifier
+    unreliable_query, reliable_query, raw_query, player_server, query_func, unique_id_to_player_match_verifier, \
+    post_query
 
 
 def test_sanity(query, result_syntax_verifier):
@@ -135,3 +136,9 @@ def test_performance(query, page):
     exec_time = time.time() - st
     print(page, "-", exec_time, "sec")
     assert exec_time < 1, "{0} - {1} sec is too long ".format(page, exec_time)
+
+@pytest.mark.bug
+def test_post(post_query):
+    r = post_query(1)
+    assert r.status_code == 405, 'POST is not returning expected status code'
+
