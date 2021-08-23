@@ -172,3 +172,20 @@ def test_correct_status_code_for_out_bounds(query_func, page):
 def test_correct_status_code_for_bad_api(player_server, url):
     r = requests.get('http://localhost:8000/{}'.format(url), auth=('admin', 'admin'))
     assert r.status_code == 404, "wrong status code({})".format(r.status_code)
+
+
+@pytest.mark.bug
+def test_player_has_unique_id_across_all_pages(reliable_query):
+    book = []
+    for i in range(16):
+        book += reliable_query(i+1)
+
+    names = {}
+    for i in book:
+        names[i['Name']] = 1 if i['Name'] not in names else names[i['Name']] + 1
+
+    names_with_multiple_ids = [(name, names[name]) for name in names if names[name] > 1]
+    print(names_with_multiple_ids)
+    assert not names_with_multiple_ids, "Some names have multiple ids across the database"
+
+
