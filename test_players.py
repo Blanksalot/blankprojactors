@@ -167,7 +167,6 @@ def test_correct_status_code_for_out_bounds(query_func, page):
     assert r.status_code == 404, "wrong status code({})".format(r.status_code)
 
 
-@pytest.mark.bug
 @pytest.mark.parametrize("url", ['player', 'layer', '123456'])
 def test_correct_status_code_for_bad_api(player_server, url):
     r = requests.get('http://localhost:8000/{}'.format(url), auth=('admin', 'admin'))
