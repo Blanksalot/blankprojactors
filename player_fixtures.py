@@ -32,9 +32,11 @@ def restart_server(kill_player_server):
         return sp.pid
     return foo
 
+
 @pytest.fixture
 def raw_query(player_server, page, user, password):
     return requests.get('http://localhost:8000/players?page={}'.format(page), auth=(user, password))
+
 
 @pytest.fixture
 def query_func(player_server):
@@ -104,6 +106,7 @@ def result_syntax_verifier():
             assert condition, "field {0} has bad syntax {1}".format(i, result_instance)
     return foo
 
+
 @pytest.fixture
 def result_name_field_verifier(result_syntax_verifier):
     def foo(result):
@@ -141,6 +144,7 @@ def unique_id_to_player_match_verifier():
             print(list_to_check)
         assert not bad_players, "{}".format(bad_players)
     return foo
+
 
 @pytest.fixture
 def timed_query(query):
